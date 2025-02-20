@@ -1,12 +1,11 @@
 <%= h1 "Inspect patient", size: "xl" %>
 
-<p>Other patient IDs: <%= @other_patient_ids %></p>
-
 <pre class="mermaid">
   <%= @mermaid.html_safe %>
 </pre>
 <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize();
 </script>
 
 <%= render AppDetailsComponent.new(summary: "Graph options", expander: true, open: true) do %>
@@ -21,11 +20,11 @@
       <%= form.search_field :other_parent_ids, value: params[:other_parent_ids], class: "nhsuk-input" %>
     </div>
 
-    <%= form.govuk_check_boxes_fieldset :missing_nhs_number, multiple: false, legend: nil do %>
+    <%= form.govuk_check_boxes_fieldset :boolean_options, multiple: false, legend: nil do %>
       <%= form.govuk_check_box :include_consents, 1, 0, multiple: false,
-                               label: { text: "Include consents" }, include_hidden: false, checked: @include_consents %>
+                               label: { text: "Include consents" }, checked: @include_consents %>
       <%= form.govuk_check_box :include_class_imports, 1, 0, multiple: false,
-                               label: { text: "Include class imports" }, include_hidden: false, checked: @include_class_imports  %>
+                               label: { text: "Include class imports" }, checked: @include_class_imports  %>
     <% end %>
 
     <%= form.govuk_submit "Update graph", name: nil %>
