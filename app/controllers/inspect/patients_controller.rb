@@ -4,6 +4,14 @@ module Inspect
   class PatientsController < ApplicationController
     def show
       @patient = policy_scope(Patient).find(params[:patient_id])
+
+      # Read the filter parameter from params
+      @include_consents = params[:include_consents] == '1'
+      @include_class_imports = params[:include_class_imports] == '1'
+      @other_patient_ids = params[:other_patient_ids].split(',').map { |s| s.strip.to_i }
+      @other_parent_ids = params[:other_parent_ids].split(',').map { |s| s.strip.to_i }
+
+      # Pass the option to your graph builder. Adjust the API as needed.
       @mermaid = "flowchart TB
   classDef patient fill:#c2e598,color:#000
   classDef parent fill:#faa0a0,color:#000
@@ -24,7 +32,12 @@ module Inspect
   patient-16390:::patient_highlighted --> consent-79740:::consent
   patient-16390:::patient_highlighted --> consent-79751:::consent
   class_import-3367:::class_import --> patient-16390:::patient_highlighted
-  class_import-3862:::class_import --> patient-16390:::patient_highlighted" #policy_scope(GraphPatient).call(@patient.id)
+  class_import-3862:::class_import --> patient-16390:::patient_highlighted"
+      # @mermaid = policy_scope(GraphPatient).call(params[:patient_id],
+      #                                            @other_patient_ids,
+      #                                            @other_parent_ids,
+      #                                            @include_consents,
+      #                                            @include_class_imports)
     end
   end
 end
