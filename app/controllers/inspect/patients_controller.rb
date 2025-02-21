@@ -2,6 +2,8 @@
 
 module Inspect
   class PatientsController < ApplicationController
+    skip_after_action :verify_policy_scoped
+
     def show
       # Merge default values into the query parameters if they aren’t present.
       defaults = {
@@ -12,7 +14,7 @@ module Inspect
       }
       params.reverse_merge!(defaults)
 
-      @patient = policy_scope(Patient).find(params[:patient_id])
+      @patient = Patient.find(params[:patient_id])
 
       # Read the filter parameter from params
       @include_consents = params[:include_consents].last == "1"
