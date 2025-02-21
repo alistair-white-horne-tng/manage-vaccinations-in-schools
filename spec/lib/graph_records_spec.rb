@@ -2,8 +2,9 @@
 
 describe GraphRecords do
   subject(:graph) do
-    described_class.new(traversals_config: traversals_config)
-                   .graph(patients: [patient])
+    described_class.new(traversals_config: traversals_config).graph(
+      patients: [patient]
+    )
   end
 
   let(:traversals_config) do
@@ -77,16 +78,19 @@ describe GraphRecords do
     subject(:graph_exceeded) do
       described_class.new(
         traversals_config: traversals_config,
-        node_limit: 1  # A very low limit to trigger recursion limit early
+        node_limit: 1 # A very low limit to trigger recursion limit early
       ).graph(patients: [patient])
     end
 
     it "returns a fallback Mermaid diagram with the error message in a red box" do
-      error_message = "Recursion limit of 1 nodes has been exceeded. Try restricting the graph."
+      error_message =
+        "Recursion limit of 1 nodes has been exceeded. Try restricting the graph."
       expect(graph_exceeded).to include("flowchart TB")
       # Assuming the error node is named `error` we check its content.
       expect(graph_exceeded.join).to include("error[#{error_message}]")
-      expect(graph_exceeded.join).to include("style error fill:#f88,stroke:#f00,stroke-width:2px")
+      expect(graph_exceeded.join).to include(
+        "style error fill:#f88,stroke:#f00,stroke-width:2px"
+      )
     end
   end
 end

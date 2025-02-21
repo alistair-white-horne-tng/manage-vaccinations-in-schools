@@ -320,6 +320,8 @@ Rails.application.routes.draw do
   get "/oidc/jwks", to: "jwks#jwks"
 
   namespace :inspect do
-    resources :patients, param: :patient_id, only: [:show]
+    namespace :graph do
+      resources :patients, param: :patient_id, only: [:show]
+    end
   end
 end

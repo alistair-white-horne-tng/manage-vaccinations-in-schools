@@ -9,7 +9,7 @@
 </script>
 
 <%= render AppDetailsComponent.new(summary: "Graph options", expander: true, open: true) do %>
-  <%= form_with url: inspect_patient_path(@patient), method: :get, local: true do |form| %>
+  <%= form_with url: inspect_graph_patient_path(@patient), method: :get, local: true do |form| %>
     <div class="nhsuk-form-group">
       <%= form.label :other_patient_ids, "Other patient IDs (comma separated)", class: "nhsuk-label" %>
       <%= form.search_field :other_patient_ids, value: params[:other_patient_ids], class: "nhsuk-input" %>
