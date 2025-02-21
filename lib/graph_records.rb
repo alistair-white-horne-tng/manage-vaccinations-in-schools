@@ -75,7 +75,7 @@ class GraphRecords
   end
 
   def introspect(obj)
-    associations_list = Array(traversals[obj.class.name.underscore.to_sym])
+    associations_list = traversals[obj.class.name.underscore.to_sym]
     return if associations_list.blank?
 
     return if @inspected.include?(obj)
@@ -100,11 +100,13 @@ class GraphRecords
   end
 
   def load_association(association_name, associated_objects)
-    if respond_to?("#{association_name}_loader")
-      send("#{association_name}_loader", associated_objects)
-    else
-      associated_objects
-    end
+    Array(
+      if respond_to?("#{association_name}_loader")
+        send("#{association_name}_loader", associated_objects)
+      else
+        associated_objects
+      end
+    )
   end
 
   def parents_loader(parents)
@@ -113,6 +115,10 @@ class GraphRecords
 
   def patients_loader(patients)
     patients.includes(:parents, :class_imports, :cohort_imports)
+  end
+
+  def consents_loader(consents)
+    consents.includes(:parent, :patient)
   end
 
   def order_nodes(*nodes)

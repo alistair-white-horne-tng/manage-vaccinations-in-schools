@@ -1,7 +1,15 @@
 # frozen_string_literal: true
 
 describe GraphRecords do
-  subject(:graph) { described_class.new.graph(patients: [patient]) }
+  subject(:graph) do
+    described_class.new(
+      traversals_config: {
+        patient: %i[parents consents class_imports cohort_imports],
+        parent: %i[consents class_imports cohort_imports],
+        consent: %i[patient]
+      }
+    ).graph(patients: [patient])
+  end
 
   let!(:programmes) { [create(:programme, :hpv)] }
   let!(:organisation) { create(:organisation, programmes:) }
