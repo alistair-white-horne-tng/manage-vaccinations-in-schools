@@ -39,7 +39,7 @@ class GraphRecords
 
       associated_objects.each do |obj|
         @nodes << obj
-        inspect(obj)
+        introspect(obj)
       end
     end
     ["flowchart TB"] + render_styles + render_nodes + render_edges
@@ -74,7 +74,7 @@ class GraphRecords
     @edges.map { |from, to| "  #{node_name(from)} --> #{node_name(to)}" }
   end
 
-  def inspect(obj)
+  def introspect(obj)
     associations_list = Array(traversals[obj.class.name.underscore.to_sym])
     return if associations_list.blank?
 
@@ -86,7 +86,7 @@ class GraphRecords
         @nodes << it
         @edges << order_nodes(obj, it)
 
-        inspect(it)
+        introspect(it)
       end
     end
   end
