@@ -21,7 +21,7 @@ module Inspect
         @include_consents = params[:include_consents].last == "1"
         @include_class_imports = params[:include_class_imports].last == "1"
         @other_patient_ids =
-          params[:other_patient_ids].split(",").map { |s| s.strip.to_i }
+          params[:other_patient_ids].split(",").map { |s| s.strip.to_i } # TODO: fix linter warnings
         @other_parent_ids =
           params[:other_parent_ids].split(",").map { |s| s.strip.to_i }
 
