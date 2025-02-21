@@ -10,14 +10,17 @@ class GraphRecords
   # @param focus_config [Hash] Hash of model names to ids to focus on (make bold)
   # @param node_order [Array] Array of model names in order to render nodes
   # @param traversals_config [Hash] Hash of model names to arrays of associations to traverse
+  # @param node_limit [Integer] The maximum number of nodes which can be displayed
   def initialize(
     focus_config: {},
     node_order: %i[class_import cohort_import patient consent parent],
-    traversals_config: {}
+    traversals_config: {},
+    node_limit: 100
   )
     @focus_config = focus_config
     @node_order = node_order
     @traversals_config = traversals_config
+    @node_limit = node_limit
   end
 
   # @param objects [Hash] Hash of model name to ids to be graphed
@@ -27,22 +30,35 @@ class GraphRecords
     @inspected = Set.new
     @focus = @focus_config.map { _1.to_s.classify.constantize.where(id: _2) }
 
-    objects.map do |klass, ids|
-      class_name = klass.to_s.singularize
-      associated_objects =
-        load_association(
-          class_name,
-          class_name.classify.constantize.where(id: ids)
-        )
+    begin
+      objects.map do |klass, ids|
+        class_name = klass.to_s.singularize
+        associated_objects =
+          load_association(
+            class_name,
+            class_name.classify.constantize.where(id: ids)
+          )
 
-      @focus += associated_objects
+        @focus += associated_objects
 
-      associated_objects.each do |obj|
-        @nodes << obj
-        introspect(obj)
+        associated_objects.each do |obj|
+          @nodes << obj
+          introspect(obj)
+        end
+      end
+      ["flowchart TB"] + render_styles + render_nodes + render_edges
+    rescue StandardError => e
+      if e.message.include?("Recursion limit")
+        # Create a Mermaid diagram with a red box containing the error message.
+        [
+          "flowchart TB",
+          "    error[#{e.message}]",
+          "    style error fill:#f88,stroke:#f00,stroke-width:2px"
+        ]
+      else
+        raise e
       end
     end
-    ["flowchart TB"] + render_styles + render_nodes + render_edges
   end
 
   def traversals
@@ -85,6 +101,10 @@ class GraphRecords
       get_associated_objects(obj, it).each do
         @nodes << it
         @edges << order_nodes(obj, it)
+
+        if @nodes.length > @node_limit
+          raise "Recursion limit of #{@node_limit} nodes has been exceeded. Try restricting the graph."
+        end
 
         introspect(it)
       end
