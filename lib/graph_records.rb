@@ -34,10 +34,7 @@ class GraphRecords
       objects.map do |klass, ids|
         class_name = klass.to_s.singularize
         associated_objects =
-          load_association(
-            class_name,
-            class_name.classify.constantize.where(id: ids)
-          )
+          load_association(class_name.classify.constantize.where(id: ids))
 
         @focus += associated_objects
 
@@ -114,31 +111,17 @@ class GraphRecords
   def get_associated_objects(obj, association_name)
     obj
       .send(association_name)
-      .then do |associated_objects|
-        load_association(association_name, associated_objects)
-      end
+      .then { |associated_objects| load_association(associated_objects) }
   end
 
-  def load_association(association_name, associated_objects)
+  def load_association(associated_objects)
     Array(
-      if respond_to?("#{association_name}_loader")
-        send("#{association_name}_loader", associated_objects)
+      if associated_objects.is_a?(ActiveRecord::Relation)
+        associated_objects.strict_loading!(false)
       else
         associated_objects
       end
     )
-  end
-
-  def parents_loader(parents)
-    parents.includes(:consents, :class_imports, :cohort_imports)
-  end
-
-  def patients_loader(patients)
-    patients.includes(:parents, :class_imports, :cohort_imports)
-  end
-
-  def consents_loader(consents)
-    consents.includes(:parent, :patient)
   end
 
   def order_nodes(*nodes)
