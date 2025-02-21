@@ -37,6 +37,7 @@ module Inspect
                 cohort_imports
               ],
               parent: %i[consents class_imports cohort_imports],
+              consent: %i[patient]
             },
             node_order: %i[
               session
