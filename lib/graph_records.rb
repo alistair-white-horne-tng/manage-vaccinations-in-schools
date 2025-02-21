@@ -75,7 +75,7 @@ class GraphRecords
   end
 
   def inspect(obj)
-    associations_list = traversals[obj.class.name.underscore.to_sym]
+    associations_list = Array(traversals[obj.class.name.underscore.to_sym])
     return if associations_list.blank?
 
     return if @inspected.include?(obj)
