@@ -22,9 +22,9 @@
 
     <%= form.govuk_check_boxes_fieldset :boolean_options, multiple: false, legend: nil do %>
       <%= form.govuk_check_box :include_consents, 1, 0, multiple: false,
-                               label: { text: "Include consents" }, checked: @include_consents %>
+                                                        label: { text: "Include consents" }, checked: @include_consents %>
       <%= form.govuk_check_box :include_class_imports, 1, 0, multiple: false,
-                               label: { text: "Include class imports" }, checked: @include_class_imports  %>
+                                                             label: { text: "Include class imports" }, checked: @include_class_imports %>
     <% end %>
 
     <%= form.govuk_submit "Update graph", name: nil %>
