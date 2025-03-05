@@ -321,7 +321,7 @@ Rails.application.routes.draw do
 
   namespace :inspect do
     namespace :graph do
-      resources :patients, param: :patient_id, only: [:show]
+      get ":object_type/:object_id", to: "graphs#show"
     end
   end
 end
