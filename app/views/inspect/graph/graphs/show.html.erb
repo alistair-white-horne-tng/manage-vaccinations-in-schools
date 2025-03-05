@@ -17,13 +17,16 @@
                         type.to_s.classify.constantize.reflect_on_all_associations
                             .sort_by { |r|
                           [
-                            params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
-                            r.name.to_s.humanize,
-                          ]
+                                        params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
+                                        r.name.to_s.humanize,
+                                      ]
                         }
                             .map { |r| [r.name.to_s.humanize, r.name] },
                         { selected: params.dig(:relationships, type) },
                         { multiple: true, class: "nhsuk-select", style: "height: 10em" } %>
+
+        <%= form.label "additional_ids[#{type}]", safe_join(["Additional ", tag.span(type, class: "nhsuk-u-font-weight-bold"), " IDs (comma separated)"]), class: "nhsuk-label" %>
+        <%= form.search_field "additional_ids[#{type}]", value: params.dig(:additional_ids, type), class: "nhsuk-input" %>
       </div>
     <% end %>
 
