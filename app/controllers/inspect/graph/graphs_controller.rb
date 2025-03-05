@@ -2,7 +2,7 @@
 
 module Inspect
   module Graph
-    class PatientsController < ApplicationController
+    class GraphsController < ApplicationController
       skip_after_action :verify_policy_scoped
 
       def show
@@ -15,7 +15,7 @@ module Inspect
         }
         params.reverse_merge!(defaults)
 
-        @patient = Patient.find(params[:patient_id])
+        @object = params[:object_type].classify.constantize.find(params[:object_id])
 
         # Read the filter parameter from params
         @include_consents = params[:include_consents].last == "1"
@@ -50,8 +50,7 @@ module Inspect
               ]
             )
             .graph(
-              patient: [@patient.id] + @other_patient_ids,
-              parent: @other_parent_ids
+              params[:object_type].to_sym => [@object.id],
             )
             .join("\n")
       end
