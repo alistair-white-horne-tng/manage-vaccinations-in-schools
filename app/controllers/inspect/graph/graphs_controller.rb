@@ -29,17 +29,19 @@ module Inspect
         @mermaid =
           GraphRecords
             .new(
-              traversals_config: {
-                patient: %i[
-                  sessions
-                  parents
-                  consents
-                  class_imports
-                  cohort_imports
-                ],
-                parent: %i[consents class_imports cohort_imports],
-                consent: %i[patient]
-              },
+              traversals_config: build_traversals_config,
+              # traversals_config: {
+              #   patient: %i[
+              #     sessions
+              #     parents
+              #     consents
+              #     class_imports
+              #     cohort_imports
+              #   ],
+              #   parent: %i[consents class_imports cohort_imports],
+              #   consent: %i[patient],
+              #   # session: %i[patients]
+              # },
               node_order: %i[
                 session
                 class_import
@@ -53,6 +55,17 @@ module Inspect
               params[:object_type].to_sym => [@object.id],
             )
             .join("\n")
+      end
+
+      private
+
+      def build_traversals_config
+        selected_relationships =
+          Array(params[:relationships])
+            .reject(&:blank?)
+            .map(&:to_sym)
+
+        { params[:object_type].to_sym => selected_relationships }
       end
 
       # def show_params
