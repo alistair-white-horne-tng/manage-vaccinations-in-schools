@@ -1,7 +1,5 @@
 <%= h1 "Inspect #{params[:object_type]} #{params[:object_id]}", size: "xl" %>
 
-<%= "Traversals: #{@traversals_config}" %>
-
 <pre class="mermaid">
   <%= @mermaid.html_safe %>
 </pre>
@@ -14,9 +12,16 @@
   <%= form_with url: inspect_graph_path(object_type: params[:object_type], object_id: params[:object_id]), method: :get, local: true do |form| %>
     <% @traversals_config.keys.sort_by { |r| r.name.to_s.humanize }.each do |type| %>
       <div class="nhsuk-form-group">
-        <%= form.label "relationships[#{type}]", "Select relationships to include for #{type}", class: "nhsuk-label" %>
+        <%= form.label "relationships[#{type}]", safe_join(["Select relationships to include for ", tag.span(type, class: "nhsuk-u-font-weight-bold")]), class: "nhsuk-label" %>
         <%= form.select "relationships[#{type}]",
-                        type.to_s.classify.constantize.reflect_on_all_associations.sort_by { |r| r.name.to_s.humanize }.map { |r| [r.name.to_s.humanize, r.name] },
+                        type.to_s.classify.constantize.reflect_on_all_associations
+                            .sort_by { |r|
+                          [
+                            params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
+                            r.name.to_s.humanize,
+                          ]
+                        }
+                            .map { |r| [r.name.to_s.humanize, r.name] },
                         { selected: params.dig(:relationships, type) },
                         { multiple: true, class: "nhsuk-select", style: "height: 10em" } %>
       </div>
