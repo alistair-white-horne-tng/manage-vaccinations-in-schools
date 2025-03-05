@@ -15,7 +15,8 @@ module Inspect
         }
         params.reverse_merge!(defaults)
 
-        @object = params[:object_type].classify.constantize.find(params[:object_id])
+        @object =
+          params[:object_type].classify.constantize.find(params[:object_id])
 
         # Read the filter parameter from params
         @include_consents = params[:include_consents].last == "1"
@@ -26,6 +27,8 @@ module Inspect
           params[:other_parent_ids].split(",").map { |s| s.strip.to_i }
 
         # Generate graph
+        @traversals_config = build_traversals_config
+
         @mermaid =
           GraphRecords
             .new(
@@ -49,23 +52,43 @@ module Inspect
                 patient
                 consent
                 parent
-              ]
+              ] # TODO: make this work with all types
             )
-            .graph(
-              params[:object_type].to_sym => [@object.id],
-            )
+            .graph(params[:object_type].to_sym => [@object.id])
             .join("\n")
       end
 
       private
 
       def build_traversals_config
-        selected_relationships =
-          Array(params[:relationships])
-            .reject(&:blank?)
-            .map(&:to_sym)
+        used_types = {}
+        to_process = Set.new([params[:object_type].to_sym])
+        processed = Set.new
 
-        { params[:object_type].to_sym => selected_relationships }
+        # Process types until we've explored all connected relationships
+        while (type = to_process.first)
+          to_process.delete(type)
+          processed.add(type)
+
+          # Get selected relationships for this type
+          selected_rels =
+            Array(params.dig(:relationships, type)).reject(&:blank?).map(
+              &:to_sym
+            )
+
+          # Add this type and its relationships to the config
+          used_types[type] = selected_rels
+
+          # Add target types to process queue
+          klass = type.to_s.classify.constantize
+          selected_rels.each do |rel|
+            target_type =
+              klass.reflect_on_association(rel).klass.name.underscore.to_sym
+            to_process.add(target_type) unless processed.include?(target_type)
+          end
+        end
+
+        used_types
       end
 
       # def show_params

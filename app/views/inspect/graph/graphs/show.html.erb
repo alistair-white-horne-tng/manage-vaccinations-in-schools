@@ -1,6 +1,6 @@
 <%= h1 "Inspect #{params[:object_type]} #{params[:object_id]}", size: "xl" %>
 
-<%= "Relationships #{params[:relationships]}" %>
+<%= "Traversals: #{@traversals_config}" %>
 
 <pre class="mermaid">
   <%= @mermaid.html_safe %>
@@ -12,13 +12,15 @@
 
 <%= render AppDetailsComponent.new(summary: "Graph options", expander: true, open: true) do %>
   <%= form_with url: inspect_graph_path(object_type: params[:object_type], object_id: params[:object_id]), method: :get, local: true do |form| %>
-    <div class="nhsuk-form-group">
-      <%= form.label :relationships, "Select relationships to include for #{params[:object_type]}", class: "nhsuk-label" %>
-      <%= form.select :relationships,
-                      @object.class.reflect_on_all_associations.sort_by { |r| r.name.to_s.humanize }.map { |r| [r.name.to_s.humanize, r.name] },
-                      { selected: params[:relationships] },
-                      { multiple: true, class: "nhsuk-select", style: "height: 10em" } %>
-    </div>
+    <% @traversals_config.keys.sort_by { |r| r.name.to_s.humanize }.each do |type| %>
+      <div class="nhsuk-form-group">
+        <%= form.label "relationships[#{type}]", "Select relationships to include for #{type}", class: "nhsuk-label" %>
+        <%= form.select "relationships[#{type}]",
+                        type.to_s.classify.constantize.reflect_on_all_associations.sort_by { |r| r.name.to_s.humanize }.map { |r| [r.name.to_s.humanize, r.name] },
+                        { selected: params.dig(:relationships, type) },
+                        { multiple: true, class: "nhsuk-select", style: "height: 10em" } %>
+      </div>
+    <% end %>
 
     <%= form.govuk_submit "Update graph", name: nil %>
   <% end %>
