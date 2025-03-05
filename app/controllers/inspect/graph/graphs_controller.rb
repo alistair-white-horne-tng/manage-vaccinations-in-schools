@@ -6,45 +6,19 @@ module Inspect
       skip_after_action :verify_policy_scoped
 
       def show
-        # Merge default values into the query parameters if they aren’t present.
-        defaults = {
-          include_consents: "1",
-          include_class_imports: "0",
-          other_patient_ids: "",
-          other_parent_ids: ""
-        }
-        params.reverse_merge!(defaults)
+        # TODO: make sure the input arguments are safe (eg no code execution)
 
         @object =
           params[:object_type].classify.constantize.find(params[:object_id])
 
-        # Read the filter parameter from params
-        @include_consents = params[:include_consents].last == "1"
-        @include_class_imports = params[:include_class_imports].last == "1"
-        @other_patient_ids =
-          params[:other_patient_ids].split(",").map { |s| s.strip.to_i } # TODO: fix linter warnings
-        @other_parent_ids =
-          params[:other_parent_ids].split(",").map { |s| s.strip.to_i }
-
         # Generate graph
         @traversals_config = build_traversals_config
+        @graph_params = build_graph_params
 
         @mermaid =
           GraphRecords
             .new(
               traversals_config: build_traversals_config,
-              # traversals_config: {
-              #   patient: %i[
-              #     sessions
-              #     parents
-              #     consents
-              #     class_imports
-              #     cohort_imports
-              #   ],
-              #   parent: %i[consents class_imports cohort_imports],
-              #   consent: %i[patient],
-              #   # session: %i[patients]
-              # },
               node_order: %i[
                 session
                 class_import
@@ -54,7 +28,7 @@ module Inspect
                 parent
               ] # TODO: make this work with all types
             )
-            .graph(params[:object_type].to_sym => [@object.id])
+            .graph(**@graph_params)
             .join("\n")
       end
 
@@ -89,6 +63,25 @@ module Inspect
         end
 
         used_types
+      end
+
+      def build_graph_params
+        # Build the graph params
+        graph_params = { params[:object_type].to_sym => [@object.id] }
+
+        # Add additional IDs from the form
+        if params[:additional_ids].present?
+          params[:additional_ids].each do |type, ids_string|
+            next if ids_string.blank?
+            additional_ids = ids_string.split(",").map { |s| s.strip.to_i }
+            next unless additional_ids.any?
+            type_sym = type.to_sym
+            graph_params[type_sym] ||= []
+            graph_params[type_sym].concat(additional_ids)
+          end
+        end
+
+        graph_params
       end
 
       # def show_params
