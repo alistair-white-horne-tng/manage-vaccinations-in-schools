@@ -17,9 +17,9 @@
                         type.to_s.classify.constantize.reflect_on_all_associations
                             .sort_by { |r|
                           [
-                                        params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
-                                        r.name.to_s.humanize,
-                                      ]
+                            params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
+                            r.name.to_s.humanize,
+                          ]
                         }
                             .map { |r| [r.name.to_s.humanize, r.name] },
                         { selected: params.dig(:relationships, type) },

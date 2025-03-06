@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "digest"
+
 # Spit out a Mermaid-style graph of records.
 #
 # Usage:
@@ -7,6 +9,31 @@
 #  puts graph
 #
 class GraphRecords
+  BOX_STYLES = %w[
+    fill:#e6194B,color:black
+    fill:#3cb44b,color:black
+    fill:#ffe119,color:black
+    fill:#4363d8,color:white
+    fill:#f58231,color:black
+    fill:#911eb4,color:white
+    fill:#42d4f4,color:black
+    fill:#f032e6,color:white
+    fill:#bfef45,color:black
+    fill:#fabed4,color:black
+    fill:#469990,color:white
+    fill:#dcbeff,color:black
+    fill:#9A6324,color:white
+    fill:#fffac8,color:black
+    fill:#800000,color:white
+    fill:#aaffc3,color:black
+    fill:#808000,color:white
+    fill:#ffd8b1,color:black
+    fill:#000075,color:white
+    fill:#a9a9a9,color:black
+    fill:#ffffff,color:black
+    fill:#000000,color:white
+  ].freeze
+
   # @param focus_config [Hash] Hash of model names to ids to focus on (make bold)
   # @param node_order [Array] Array of model names in order to render nodes
   # @param traversals_config [Hash] Hash of model names to arrays of associations to traverse
@@ -66,15 +93,26 @@ class GraphRecords
   end
 
   def render_styles
-    {
-      patient: "fill:#c2e598",
-      parent: "fill:#faa0a0",
-      consent: "fill:#fffaa0",
-      class_import: "fill:#7fd7df",
-      cohort_import: "fill:#a2d2ff",
-      patient_focused: "fill:#c2e598,stroke:#000,stroke-width:3px",
-      parent_focused: "fill:#faa0a0,stroke:#000,stroke-width:3px"
-    }.with_indifferent_access
+    # object_types = %i[session programme patient parent consent class_import cohort_import]
+    object_types =
+      @nodes.to_a.map { |node| node.class.name.underscore.to_sym }.uniq
+
+    styles =
+      object_types.each_with_object({}) do |type, hash|
+        color_index =
+          Digest::MD5.hexdigest(type.to_s).to_i(16) % BOX_STYLES.length
+        hash[type] = "#{BOX_STYLES[color_index]},stroke:#000"
+      end
+
+    focused_styles =
+      styles.each_with_object({}) do |(type, style), hash|
+        hash["#{type}_focused"] = "#{style},stroke-width:3px"
+      end
+
+    styles.merge!(focused_styles)
+
+    styles
+      .with_indifferent_access
       .slice(*(@nodes.map { class_text_for_obj(it) }))
       .map { |klass, style| "  classDef #{klass} #{style}" }
   end
