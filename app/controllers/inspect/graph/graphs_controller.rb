@@ -20,11 +20,13 @@ module Inspect
             .new(
               traversals_config: build_traversals_config,
               node_order: %i[
+                programme
                 session
                 class_import
                 cohort_import
                 patient
                 consent
+                parent_relationship
                 parent
               ] # TODO: make this work with all types
             )
