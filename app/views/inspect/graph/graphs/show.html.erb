@@ -1,7 +1,6 @@
 <%= h1 "Inspect #{params[:object_type]} #{params[:object_id]}", size: "xl" %>
 
 
-<!-- TODO add a way for users to view the raw mermaid -->
 <pre class="mermaid">
   <%= @mermaid.html_safe %>
 </pre>
@@ -9,6 +8,10 @@
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
     mermaid.initialize();
 </script>
+
+<%= render AppDetailsComponent.new(summary: "Raw mermaid", expander: true, open: false) do %>
+  <pre class="nhsuk-u-font-family-monospace nhsuk-u-margin-0" style="font-size: small;"><%= @mermaid %></pre>
+<% end %>
 
 <%= render AppDetailsComponent.new(summary: "Graph options", expander: true, open: true) do %>
   <%= form_with url: inspect_graph_path(object_type: params[:object_type], object_id: params[:object_id]), method: :get, local: true do |form| %>
@@ -21,9 +24,9 @@
                         type.to_s.classify.constantize.reflect_on_all_associations
                             .sort_by { |r|
                           [
-                                        params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
-                                        r.name.to_s.humanize,
-                                      ]
+                                            params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
+                                            r.name.to_s.humanize,
+                                          ]
                         }
                             .map { |r| [r.name.to_s.humanize, r.name] },
                         { selected: params.dig(:relationships, type) },
