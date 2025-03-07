@@ -10,7 +10,7 @@ require "digest"
 #
 class GraphRecords
   BOX_STYLES = %w[
-    fill:#e6194B,color:black
+    fill:#e6194B,color:white
     fill:#3cb44b,color:black
     fill:#ffe119,color:black
     fill:#4363d8,color:white
@@ -108,8 +108,9 @@ class GraphRecords
 
   def traversals
     @traversals ||= {
-      patient: %i[parents consents class_imports cohort_imports],
-      parent: %i[consents class_imports cohort_imports]
+      patient: %i[parents consents cohort_imports vaccination_records sessions],
+      parent: %i[patients consents],
+      consent: %i[consent_form patient parent],
     }.merge(@traversals_config)
   end
 
