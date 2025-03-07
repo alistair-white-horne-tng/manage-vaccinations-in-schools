@@ -53,7 +53,7 @@ class GraphRecords
     consent_form
     parent_relationship
     parent
-  ]
+  ].freeze
 
   # @param focus_config [Hash] Hash of model names to ids to focus on (make bold)
   # @param node_order [Array] Array of model names in order to render nodes
@@ -184,11 +184,14 @@ class GraphRecords
   end
 
   def order_nodes(*nodes)
-    nodes.sort_by { |node| @node_order.index(node.class.name.underscore.to_sym) || Float::INFINITY }
+    nodes.sort_by do |node|
+      @node_order.index(node.class.name.underscore.to_sym) || Float::INFINITY
+    end
   end
 
   def node_name(obj)
-    # TODO decide if sometimes details about the object can be displayed as well; if the info isn't PII. Eg organisation name
+    # TODO: decide if sometimes details about the object can be displayed as well; if the info isn't PII ->
+    # Eg organisation name
     klass = obj.class.name.underscore
     "#{klass}-#{obj.id}"
   end

@@ -6,7 +6,7 @@ module Inspect
       skip_after_action :verify_policy_scoped
 
       def show
-        # TODO: make sure the input arguments are safe (eg no code execution)
+        # TODO: add whitelist of allowed object types (where `.constantize` is)?
 
         @object =
           params[:object_type].classify.constantize.find(params[:object_id])
@@ -17,9 +17,7 @@ module Inspect
 
         @mermaid =
           GraphRecords
-            .new(
-              traversals_config: build_traversals_config,
-            )
+            .new(traversals_config: build_traversals_config)
             .graph(**@graph_params)
             .join("\n")
       end
@@ -48,8 +46,10 @@ module Inspect
           # Add target types to process queue
           klass = type.to_s.classify.constantize
           selected_rels.each do |rel|
-            target_type =
-              klass.reflect_on_association(rel).klass.name.underscore.to_sym
+            association = klass.reflect_on_association(rel)
+            next unless association
+
+            target_type = association.klass.name.underscore.to_sym
             to_process.add(target_type) unless processed.include?(target_type)
           end
         end
