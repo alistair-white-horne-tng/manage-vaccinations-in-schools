@@ -1,5 +1,7 @@
 <%= h1 "Inspect #{params[:object_type]} #{params[:object_id]}", size: "xl" %>
 
+
+<!-- TODO add a way for users to view the raw mermaid -->
 <pre class="mermaid">
   <%= @mermaid.html_safe %>
 </pre>
@@ -10,8 +12,10 @@
 
 <%= render AppDetailsComponent.new(summary: "Graph options", expander: true, open: true) do %>
   <%= form_with url: inspect_graph_path(object_type: params[:object_type], object_id: params[:object_id]), method: :get, local: true do |form| %>
+    <!-- TODO add UI to allow changing order of nodes -->
     <% @traversals_config.keys.sort_by { |r| r.name.to_s.humanize }.each do |type| %>
       <div class="nhsuk-form-group">
+        <!-- TODO improve formatting for this to make it more obvious which object is being edited -->
         <%= form.label "relationships[#{type}]", safe_join(["Select relationships to include for ", tag.span(type, class: "nhsuk-u-font-weight-bold")]), class: "nhsuk-label" %>
         <%= form.select "relationships[#{type}]",
                         type.to_s.classify.constantize.reflect_on_all_associations

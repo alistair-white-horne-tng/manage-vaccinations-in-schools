@@ -34,13 +34,34 @@ class GraphRecords
     fill:#000000,color:white
   ].freeze
 
+  DEFAULT_NODE_ORDER = %i[
+    programme
+    class_import
+    cohort_import
+    organisation
+    team
+    location
+    session
+    patient_session
+    patient
+    vaccine
+    batch
+    vaccination_record
+    triage
+    user
+    consent
+    consent_form
+    parent_relationship
+    parent
+  ]
+
   # @param focus_config [Hash] Hash of model names to ids to focus on (make bold)
   # @param node_order [Array] Array of model names in order to render nodes
   # @param traversals_config [Hash] Hash of model names to arrays of associations to traverse
   # @param node_limit [Integer] The maximum number of nodes which can be displayed
   def initialize(
     focus_config: {},
-    node_order: %i[class_import cohort_import patient consent parent],
+    node_order: DEFAULT_NODE_ORDER,
     traversals_config: {},
     node_limit: 100
   )
@@ -163,10 +184,11 @@ class GraphRecords
   end
 
   def order_nodes(*nodes)
-    nodes.sort_by { @node_order.index(it.class.name.underscore.to_sym) }
+    nodes.sort_by { |node| @node_order.index(node.class.name.underscore.to_sym) || Float::INFINITY }
   end
 
   def node_name(obj)
+    # TODO decide if sometimes details about the object can be displayed as well; if the info isn't PII. Eg organisation name
     klass = obj.class.name.underscore
     "#{klass}-#{obj.id}"
   end
