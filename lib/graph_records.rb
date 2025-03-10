@@ -91,7 +91,7 @@ class GraphRecords
           introspect(obj)
         end
       end
-      ["flowchart TB"] + render_styles + render_nodes + render_edges
+      ["flowchart TB"] + render_styles + render_nodes + render_edges + render_clicks
     rescue StandardError => e
       if e.message.include?("Recursion limit")
         # Create a Mermaid diagram with a red box containing the error message.
@@ -147,6 +147,10 @@ class GraphRecords
     @edges.map { |from, to| "  #{node_name(from)} --> #{node_name(to)}" }
   end
 
+  def render_clicks
+    @nodes.to_a.map { "  click #{node_name(it)} \"#{node_link(it)}\"" }
+  end
+
   def introspect(obj)
     associations_list = traversals[obj.class.name.underscore.to_sym]
     return if associations_list.blank?
@@ -188,6 +192,12 @@ class GraphRecords
     nodes.sort_by do |node|
       @node_order.index(node.class.name.underscore.to_sym) || Float::INFINITY
     end
+  end
+
+  def node_link(obj)
+    base_endpoint = Rails.application.routes.default_url_options[:host]
+
+    "#{base_endpoint}/inspect/graph/#{obj.class.name.underscore}/#{obj.id}"
   end
 
   def node_name(obj)

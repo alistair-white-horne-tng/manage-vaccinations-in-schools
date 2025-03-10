@@ -15,6 +15,7 @@ module Inspect
         @traversals_config = build_traversals_config
         @graph_params = build_graph_params
 
+        # TODO add defaults per object type
         @mermaid =
           GraphRecords
             .new(traversals_config: build_traversals_config)
