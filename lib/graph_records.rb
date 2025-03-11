@@ -65,6 +65,7 @@ class GraphRecords
         vaccination_records
         sessions
         triages
+        school
       ],
       parent: %i[patients consents cohort_imports class_imports],
       consent: %i[consent_form patient parent],
@@ -203,7 +204,6 @@ class GraphRecords
   end
 
   def render_styles
-    # object_types = %i[session programme patient parent consent class_import cohort_import]
     object_types =
       @nodes.to_a.map { |node| node.class.name.underscore.to_sym }.uniq
 
