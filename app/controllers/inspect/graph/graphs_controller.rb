@@ -8,6 +8,17 @@ module Inspect
       def show
         # TODO: add whitelist of allowed object types (where `.constantize` is)?
 
+        @primary_type = params[:object_type].to_sym
+
+        # Set default relationships when loading a page
+        if params[:relationships].blank? &&
+             GraphRecords::DEFAULT_TRAVERSALS.key?(@primary_type)
+          default_rels = GraphRecords::DEFAULT_TRAVERSALS[@primary_type] || {}
+          # Merge the default relationships and any additional_ids already provided.
+          new_params = params.to_unsafe_h.merge("relationships" => default_rels)
+          redirect_to inspect_graph_path(new_params) and return
+        end
+
         @object =
           params[:object_type].classify.constantize.find(params[:object_id])
 
@@ -15,7 +26,6 @@ module Inspect
         @traversals_config = build_traversals_config
         @graph_params = build_graph_params
 
-        # TODO add defaults per object type
         @mermaid =
           GraphRecords
             .new(traversals_config: build_traversals_config)
@@ -27,7 +37,7 @@ module Inspect
 
       def build_traversals_config
         used_types = {}
-        to_process = Set.new([params[:object_type].to_sym])
+        to_process = Set.new([@primary_type])
         processed = Set.new
 
         # Process types until we've explored all connected relationships
@@ -60,7 +70,7 @@ module Inspect
 
       def build_graph_params
         # Build the graph params
-        graph_params = { params[:object_type].to_sym => [@object.id] }
+        graph_params = { @primary_type => [@object.id] }
 
         # Add additional IDs from the form
         if params[:additional_ids].present?

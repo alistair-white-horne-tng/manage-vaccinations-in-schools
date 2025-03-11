@@ -55,6 +55,82 @@ class GraphRecords
     parent
   ].freeze
 
+  DEFAULT_TRAVERSALS = {
+    patient: {
+      patient: %i[
+        parents
+        consents
+        cohort_imports
+        class_imports
+        vaccination_records
+        sessions
+        triages
+      ],
+      parent: %i[patients consents cohort_imports class_imports],
+      consent: %i[consent_form patient parent],
+      session: %i[location],
+      vaccination_record: %i[session]
+    },
+    parent: {
+      parent: %i[class_imports cohort_imports consents patients],
+      class_import: %i[session],
+      consent: %i[parent patient],
+      patient: %i[parents sessions consents],
+      session: %i[location]
+    },
+    consent: {
+      consent: %i[consent_form parent patient programme],
+      parent: %i[patients],
+      patient: %i[parents]
+    },
+    consent_form: {
+      consent_form: [:consent]
+    },
+    vaccination_record: {
+      vaccination_record: %i[
+        patient
+        programme
+        session
+        vaccine
+        performed_by_user
+      ],
+      patient: [:consents],
+      session: [:location],
+      consent: [:programme]
+    },
+    location: {
+      location: %i[sessions organisation team]
+    },
+    session: {
+      session: %i[location programmes session_dates]
+    },
+    triage: {
+      triage: %i[patient performed_by programme]
+    },
+    programme: {
+      programme: %i[active_vaccines organisations vaccines]
+    },
+    organisation: {
+      organisation: %i[programmes teams]
+    },
+    team: {
+      team: [:organisation]
+    },
+    vaccine: {
+      vaccine: %i[batches programme]
+    },
+    batch: {
+      batch: %i[organisation vaccine],
+      organisation: [],
+      vaccine: [:programme],
+      programme: []
+    },
+    user: {
+      user: %i[organisations programmes],
+      organisation: [:programmes]
+    }
+  }.freeze
+
   # @param focus_config [Hash] Hash of model names to ids to focus on (make bold)
   # @param node_order [Array] Array of model names in order to render nodes
   # @param traversals_config [Hash] Hash of model names to arrays of associations to traverse
@@ -63,12 +139,14 @@ class GraphRecords
     focus_config: {},
     node_order: DEFAULT_NODE_ORDER,
     traversals_config: {},
-    node_limit: 100
+    node_limit: 100,
+    primary_type: nil
   )
     @focus_config = focus_config
     @node_order = node_order
     @traversals_config = traversals_config
     @node_limit = node_limit
+    @primary_type = primary_type
   end
 
   # @param objects [Hash] Hash of model name to ids to be graphed
@@ -77,6 +155,10 @@ class GraphRecords
     @edges = Set.new
     @inspected = Set.new
     @focus = @focus_config.map { _1.to_s.classify.constantize.where(id: _2) }
+
+    if @primary_type.nil?
+      @primary_type = objects.keys.size == 1 ? objects.keys.first.to_s.singularize.to_sym : :patient
+    end
 
     begin
       objects.map do |klass, ids|
@@ -91,7 +173,8 @@ class GraphRecords
           introspect(obj)
         end
       end
-      ["flowchart TB"] + render_styles + render_nodes + render_edges + render_clicks
+      ["flowchart TB"] + render_styles + render_nodes + render_edges +
+        render_clicks # TODO: disable clicks if executed from terminal
     rescue StandardError => e
       if e.message.include?("Recursion limit")
         # Create a Mermaid diagram with a red box containing the error message.
@@ -107,11 +190,7 @@ class GraphRecords
   end
 
   def traversals
-    @traversals ||= {
-      patient: %i[parents consents cohort_imports vaccination_records sessions],
-      parent: %i[patients consents],
-      consent: %i[consent_form patient parent],
-    }.merge(@traversals_config)
+    @traversals ||= DEFAULT_TRAVERSALS[@primary_type].merge(@traversals_config)
   end
 
   def render_styles
@@ -195,6 +274,7 @@ class GraphRecords
   end
 
   def node_link(obj)
+    # TODO: make outgoing object bold in new graph
     base_endpoint = Rails.application.routes.default_url_options[:host]
 
     "#{base_endpoint}/inspect/graph/#{obj.class.name.underscore}/#{obj.id}"

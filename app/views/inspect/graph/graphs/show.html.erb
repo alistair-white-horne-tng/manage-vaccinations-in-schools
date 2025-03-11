@@ -1,5 +1,8 @@
 <%= h1 "Inspect #{params[:object_type]} #{params[:object_id]}", size: "xl" %>
 
+<%= "Traversals: #{@traversals_config}" %>
+
+<%= "Graph params: #{@graph_params}" %>
 
 <!-- TODO make view area scrollable (and wider) [talk to Paul] -->
 <pre class="mermaid">
@@ -27,9 +30,9 @@
                         type.to_s.classify.constantize.reflect_on_all_associations
                             .sort_by { |r|
                           [
-                                            params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
-                                            r.name.to_s.humanize,
-                                          ]
+                            params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
+                            r.name.to_s.humanize,
+                          ]
                         }
                             .map { |r| [r.name.to_s.humanize, r.name] },
                         { selected: params.dig(:relationships, type) },
