@@ -11,10 +11,10 @@ require "digest"
 class GraphRecords
   BOX_STYLES = %w[
     fill:#e6194B,color:white
-    fill:#3cb44b,color:black
+    fill:#3cb44b,color:white
     fill:#ffe119,color:black
     fill:#4363d8,color:white
-    fill:#f58231,color:black
+    fill:#f58231,color:white
     fill:#911eb4,color:white
     fill:#42d4f4,color:black
     fill:#f032e6,color:white
@@ -29,7 +29,7 @@ class GraphRecords
     fill:#808000,color:white
     fill:#ffd8b1,color:black
     fill:#000075,color:white
-    fill:#a9a9a9,color:black
+    fill:#a9a9a9,color:white
     fill:#ffffff,color:black
     fill:#000000,color:white
   ].freeze
@@ -283,8 +283,6 @@ class GraphRecords
   end
 
   def node_link(obj)
-    # TODO: make outgoing object bold in new graph
-
     "/inspect/graph/#{obj.class.name.underscore}/#{obj.id}"
   end
 
