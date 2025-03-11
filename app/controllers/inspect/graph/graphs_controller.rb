@@ -28,7 +28,11 @@ module Inspect
 
         @mermaid =
           GraphRecords
-            .new(traversals_config: build_traversals_config)
+            .new(
+              traversals_config: build_traversals_config,
+              primary_type: @primary_type,
+              clickable: true
+            )
             .graph(**@graph_params)
             .join("\n")
       end

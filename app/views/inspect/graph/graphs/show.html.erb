@@ -1,9 +1,5 @@
 <%= h1 "Inspect #{params[:object_type]} #{params[:object_id]}", size: "xl" %>
 
-<%= "Traversals: #{@traversals_config}" %>
-
-<%= "Graph params: #{@graph_params}" %>
-
 <!-- TODO make view area scrollable (and wider) [talk to Paul] -->
 <pre class="mermaid">
   <%= @mermaid.html_safe %>

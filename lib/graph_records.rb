@@ -140,13 +140,15 @@ class GraphRecords
     node_order: DEFAULT_NODE_ORDER,
     traversals_config: {},
     node_limit: 100,
-    primary_type: nil
+    primary_type: nil,
+    clickable: false
   )
     @focus_config = focus_config
     @node_order = node_order
     @traversals_config = traversals_config
     @node_limit = node_limit
     @primary_type = primary_type
+    @clickable = clickable
   end
 
   # @param objects [Hash] Hash of model name to ids to be graphed
@@ -157,7 +159,14 @@ class GraphRecords
     @focus = @focus_config.map { _1.to_s.classify.constantize.where(id: _2) }
 
     if @primary_type.nil?
-      @primary_type = objects.keys.size == 1 ? objects.keys.first.to_s.singularize.to_sym : :patient
+      @primary_type =
+        (
+          if objects.keys.size == 1
+            objects.keys.first.to_s.singularize.to_sym
+          else
+            :patient
+          end
+        )
     end
 
     begin
@@ -174,7 +183,7 @@ class GraphRecords
         end
       end
       ["flowchart TB"] + render_styles + render_nodes + render_edges +
-        render_clicks # TODO: disable clicks if executed from terminal
+        (@clickable ? render_clicks : [])
     rescue StandardError => e
       if e.message.include?("Recursion limit")
         # Create a Mermaid diagram with a red box containing the error message.
@@ -275,14 +284,13 @@ class GraphRecords
 
   def node_link(obj)
     # TODO: make outgoing object bold in new graph
-    base_endpoint = Rails.application.routes.default_url_options[:host]
 
-    "#{base_endpoint}/inspect/graph/#{obj.class.name.underscore}/#{obj.id}"
+    "/inspect/graph/#{obj.class.name.underscore}/#{obj.id}"
   end
 
   def node_name(obj)
     # TODO: decide if sometimes details about the object can be displayed as well; if the info isn't PII ->
-    # Eg organisation name
+    # Eg consent outcome, vaccine name
     klass = obj.class.name.underscore
     "#{klass}-#{obj.id}"
   end
