@@ -9,6 +9,7 @@ require "digest"
 #  puts graph
 #
 class GraphRecords
+  # TODO: put all these constants elsewhere?
   BOX_STYLES = %w[
     fill:#e6194B,color:white
     fill:#3cb44b,color:white
@@ -36,12 +37,12 @@ class GraphRecords
 
   DEFAULT_NODE_ORDER = %i[
     programme
-    class_import
-    cohort_import
     organisation
     team
     location
     session
+    class_import
+    cohort_import
     patient_session
     patient
     vaccine
@@ -132,6 +133,12 @@ class GraphRecords
     },
     session_date: {
       session_date: [:session]
+    },
+    cohort_import: {
+      cohort_import: %i[organisation uploaded_by],
+    },
+    class_import: {
+      class_import: %i[organisation uploaded_by],
     }
   }.freeze
 
