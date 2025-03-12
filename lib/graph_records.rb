@@ -129,6 +129,9 @@ class GraphRecords
     user: {
       user: %i[organisations programmes],
       organisation: [:programmes]
+    },
+    session_date: {
+      session_date: [:session]
     }
   }.freeze
 
@@ -200,7 +203,8 @@ class GraphRecords
   end
 
   def traversals
-    @traversals ||= DEFAULT_TRAVERSALS[@primary_type].merge(@traversals_config)
+    @traversals ||=
+      DEFAULT_TRAVERSALS[@primary_type] || {}.merge(@traversals_config)
   end
 
   def render_styles
