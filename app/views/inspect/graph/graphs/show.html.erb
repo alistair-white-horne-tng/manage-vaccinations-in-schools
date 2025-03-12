@@ -1,13 +1,16 @@
 <%= h1 "Inspect #{params[:object_type]} #{params[:object_id]}", size: "xl" %>
 
-<!-- TODO make view area scrollable (and wider) [talk to Paul] -->
-<pre class="mermaid">
+<pre class="mermaid" style="overflow-x: auto; width: 100vw; margin-left: calc(50% - 50vw); display: grid; place-items: center;">
   <%= @mermaid.html_safe %>
 </pre>
 <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
     mermaid.initialize({
-        securityLevel: 'loose'
+        startOnLoad: true,
+        flowchart: {
+          securityLevel: 'loose',
+          useMaxWidth: false
+        }
     });
 </script>
 

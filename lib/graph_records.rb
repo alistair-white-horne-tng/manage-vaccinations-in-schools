@@ -140,7 +140,7 @@ class GraphRecords
     focus_config: {},
     node_order: DEFAULT_NODE_ORDER,
     traversals_config: {},
-    node_limit: 100,
+    node_limit: 1000,
     primary_type: nil,
     clickable: false
   )

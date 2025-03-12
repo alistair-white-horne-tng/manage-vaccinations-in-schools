@@ -5,6 +5,8 @@ module Inspect
     class GraphsController < ApplicationController
       skip_after_action :verify_policy_scoped
 
+      layout "full"
+
       def show
         # TODO: add whitelist of allowed object types (where `.constantize` is)?
 
