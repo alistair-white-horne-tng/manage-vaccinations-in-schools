@@ -211,7 +211,7 @@ class GraphRecords
 
   def traversals
     @traversals ||=
-      DEFAULT_TRAVERSALS[@primary_type] || {}.merge(@traversals_config)
+      (DEFAULT_TRAVERSALS[@primary_type] || {}).merge(@traversals_config)
   end
 
   def render_styles
