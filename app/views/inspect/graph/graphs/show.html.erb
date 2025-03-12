@@ -1,4 +1,4 @@
-<%= h1 "Inspect #{params[:object_type]} #{params[:object_id]}", size: "xl" %>
+<%= h1 "Inspect #{params[:object_type].singularize} #{params[:object_id]}", size: "xl" %>
 
 <pre class="mermaid" style="overflow-x: auto; width: 100vw; margin-left: calc(50% - 50vw); display: grid; place-items: center;">
   <%= @mermaid.html_safe %>
