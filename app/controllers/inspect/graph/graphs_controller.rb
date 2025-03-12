@@ -8,7 +8,7 @@ module Inspect
       def show
         # TODO: add whitelist of allowed object types (where `.constantize` is)?
 
-        @primary_type = params[:object_type].to_sym
+        @primary_type = params[:object_type].singularize.to_sym
 
         # Set default relationships when loading a page
         if params[:relationships].blank? &&
