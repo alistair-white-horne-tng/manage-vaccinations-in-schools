@@ -24,18 +24,20 @@
     <% @traversals_config.keys.sort_by { |r| r.name.to_s.humanize }.each do |type| %>
       <div class="nhsuk-form-group">
         <h1 class="nhsuk-heading-m"><%= type.to_s.humanize %></h1>
-        <%= form.label "relationships[#{type}]", safe_join(["Select relationships to include for ", tag.span(type, class: "nhsuk-u-font-weight-bold")]), class: "nhsuk-label" %>
-        <%= form.select "relationships[#{type}]",
-                        type.to_s.classify.constantize.reflect_on_all_associations
-                            .sort_by { |r|
-                          [
-                            params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
-                            r.name.to_s.humanize,
-                          ]
-                        }
-                            .map { |r| [r.name.to_s.humanize, r.name] },
-                        { selected: params.dig(:relationships, type) },
-                        { multiple: true, class: "nhsuk-select", style: "height: 10em" } %>
+
+        <!-- TODO: sort out bold -->
+        <%= form.govuk_check_boxes_fieldset "relationships[#{type}]", legend: { text: safe_join(["Select relationships to include for ", tag.span(type, class: "nhsuk-u-font-weight-bold")]), size: "s" } do %>
+          <% type.to_s.classify.constantize.reflect_on_all_associations.sort_by { |r|
+            [
+              params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
+              r.name.to_s.humanize
+            ]
+          }.each do |r| %>
+            <%= form.govuk_check_box "relationships[#{type}]", r.name, label: { text: r.name.to_s.humanize }, checked: params.dig(:relationships, type)&.include?(r.name.to_s) %>
+          <% end %>
+        <% end %>
+
+        <br>
 
         <%= form.label "additional_ids[#{type}]", safe_join(["Additional ", tag.span(type, class: "nhsuk-u-font-weight-bold"), " IDs (comma separated)"]), class: "nhsuk-label" %>
         <%= form.search_field "additional_ids[#{type}]", value: params.dig(:additional_ids, type), class: "nhsuk-input" %>
