@@ -27,8 +27,8 @@
     <% @traversals_config.keys.sort_by { |r| r.name.to_s.humanize }.each do |type| %>
       <%= render AppDetailsComponent.new(summary: "#{type.to_s.humanize}", expander: true, open: false) do %>
         <div class="nhsuk-form-group" style="padding: 5px;">
-          <!-- TODO: sort out bold -->
-          <%= form.govuk_check_boxes_fieldset "relationships[#{type}]", legend: { text: safe_join(["Select relationships to include for ", tag.span(type, class: "nhsuk-u-font-weight-bold")]), size: "s" } do %>
+          <%= form.label "additional_ids[#{type}]", safe_join(["Select relationships to include for ", tag.span(type, class: "nhsuk-u-font-weight-bold")]), class: "nhsuk-label" %>
+          <%= form.govuk_check_boxes_fieldset "relationships[#{type}]", legend: { hidden: true } do %>
             <% type.to_s.classify.constantize.reflect_on_all_associations.sort_by { |r|
                  [
                    params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
