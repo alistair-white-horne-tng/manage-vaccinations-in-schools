@@ -298,14 +298,18 @@ class GraphRecords
   end
 
   def node_name(obj)
-    # TODO: decide if sometimes details about the object can be displayed as well; if the info isn't PII ->
-    # Eg consent outcome, vaccine name
     klass = obj.class.name.underscore
     "#{klass}-#{obj.id}"
   end
 
+  def node_display_name(obj)
+    # TODO: is this actually better?
+    klass = obj.class.name.underscore.humanize
+    "#{klass} #{obj.id}"
+  end
+
   def node_with_class(obj)
-    "#{node_name(obj)}:::#{class_text_for_obj(obj)}"
+    "#{node_name(obj)}[#{node_display_name(obj)}]:::#{class_text_for_obj(obj)}"
   end
 
   def class_text_for_obj(obj)
