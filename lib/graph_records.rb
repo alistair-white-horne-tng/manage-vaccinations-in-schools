@@ -35,6 +35,28 @@ class GraphRecords
     fill:#000000,color:white
   ].freeze
 
+  # TODO: choose good allowed values
+  ALLOWED_TYPES = %i[
+    programme
+    organisation
+    team
+    location
+    session
+    class_import
+    cohort_import
+    patient_session
+    patient
+    vaccine
+    batch
+    vaccination_record
+    triage
+    user
+    consent
+    consent_form
+    parent_relationship
+    parent
+  ].freeze
+
   DEFAULT_NODE_ORDER = %i[
     programme
     organisation
@@ -123,9 +145,7 @@ class GraphRecords
     },
     batch: {
       batch: %i[organisation vaccine],
-      organisation: [],
-      vaccine: [:programme],
-      programme: []
+      vaccine: [:programme]
     },
     user: {
       user: %i[organisations programmes],
@@ -135,10 +155,10 @@ class GraphRecords
       session_date: [:session]
     },
     cohort_import: {
-      cohort_import: %i[organisation uploaded_by],
+      cohort_import: %i[organisation uploaded_by]
     },
     class_import: {
-      class_import: %i[organisation uploaded_by],
+      class_import: %i[organisation uploaded_by]
     }
   }.freeze
 

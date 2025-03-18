@@ -8,9 +8,8 @@ module Inspect
       layout "full"
 
       def show
-        # TODO: add whitelist of allowed object types (where `.constantize` is)?
-
-        @primary_type = params[:object_type].singularize.to_sym
+        @primary_type = safe_get_primary_type
+        @primary_id = params[:object_id].to_i
 
         # Set default relationships when loading a page
         if params[:relationships].blank? &&
@@ -21,8 +20,7 @@ module Inspect
           redirect_to inspect_graph_path(new_params) and return
         end
 
-        @object =
-          params[:object_type].classify.constantize.find(params[:object_id])
+        @object = @primary_type.to_s.classify.constantize.find(@primary_id)
 
         # Generate graph
         @traversals_config = build_traversals_config
@@ -93,9 +91,15 @@ module Inspect
         graph_params
       end
 
-      # def show_params
-      #   params.expect(batch: %i[name expiry(3i) expiry(2i) expiry(1i)])
-      # end
+      def safe_get_primary_type
+        object_type = params[:object_type].to_s.downcase.singularize
+        allowed_types = GraphRecords::ALLOWED_TYPES.map(&:to_s)
+        unless allowed_types.include?(object_type)
+          render plain: "Invalid object type: #{object_type}",
+                 status: :bad_request and return
+        end
+        object_type.to_sym
+      end
     end
   end
 end

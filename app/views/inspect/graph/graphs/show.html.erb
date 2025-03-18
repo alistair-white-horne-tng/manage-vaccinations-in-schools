@@ -1,8 +1,8 @@
 <div style="margin-bottom: 48px;">
-  <%= h1 "Inspect #{@primary_type.to_s.humanize.downcase} #{params[:object_id]}", size: "xl", style: "margin-bottom: 10px;" %>
+  <%= h1 "Inspect #{@primary_type.to_s.humanize.downcase} #{@primary_id}", size: "xl", style: "margin-bottom: 10px;" %>
 
   <code>
-    <%= "#{@primary_type.to_s.classify}.find(#{params[:object_id]})" %>
+    <%= "#{@primary_type.to_s.classify}.find(#{@primary_id})" %>
   </code>
 </div>
 
@@ -22,7 +22,7 @@
 </script>
 
 <%= render AppDetailsComponent.new(summary: "Graph options", expander: true, open: false) do %>
-  <%= form_with url: inspect_graph_path(object_type: params[:object_type], object_id: params[:object_id]), method: :get, local: true do |form| %>
+  <%= form_with url: inspect_graph_path(object_type: @primary_type, object_id: @primary_id), method: :get, local: true do |form| %>
     <!-- TODO add UI to allow changing order of nodes -->
     <% @traversals_config.keys.sort_by { |r| r.name.to_s.humanize }.each do |type| %>
       <%= render AppDetailsComponent.new(summary: "#{type.to_s.humanize}", expander: true, open: false) do %>
@@ -30,11 +30,11 @@
           <!-- TODO: sort out bold -->
           <%= form.govuk_check_boxes_fieldset "relationships[#{type}]", legend: { text: safe_join(["Select relationships to include for ", tag.span(type, class: "nhsuk-u-font-weight-bold")]), size: "s" } do %>
             <% type.to_s.classify.constantize.reflect_on_all_associations.sort_by { |r|
-              [
-                params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
-                r.name.to_s.humanize
-              ]
-            }.each do |r| %>
+                 [
+                   params.dig(:relationships, type)&.include?(r.name.to_s) ? 0 : 1,
+                   r.name.to_s.humanize,
+                 ]
+               }.each do |r| %>
               <%= form.govuk_check_box "relationships[#{type}]", r.name, label: { text: r.name.to_s.humanize }, checked: params.dig(:relationships, type)&.include?(r.name.to_s) %>
             <% end %>
           <% end %>
