@@ -307,7 +307,6 @@ class GraphRecords
   end
 
   def node_display_name(obj)
-    # TODO: is this actually better?
     klass = obj.class.name.underscore.humanize
     "#{klass} #{obj.id}"
   end

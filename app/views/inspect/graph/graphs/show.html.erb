@@ -1,4 +1,11 @@
-<%= h1 "Inspect #{params[:object_type].singularize} #{params[:object_id]}", size: "xl" %>
+<div style="margin-bottom: 48px;">
+  <%= h1 "Inspect #{@primary_type.to_s.humanize.downcase} #{params[:object_id]}", size: "xl", style: "margin-bottom: 10px;" %>
+
+  <code>
+    <%= "#{@primary_type.to_s.classify}.find(#{params[:object_id]})" %>
+  </code>
+</div>
+
 
 <pre class="mermaid" style="overflow-x: auto; width: 100vw; margin-left: calc(50% - 50vw); display: grid; place-items: center;">
   <%= @mermaid.html_safe %>
