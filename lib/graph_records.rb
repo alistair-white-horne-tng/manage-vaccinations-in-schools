@@ -192,7 +192,7 @@ class GraphRecords
     if @primary_type.nil?
       @primary_type =
         (
-          if objects.keys.size == 1
+          if objects.keys.size >= 1
             objects.keys.first.to_s.singularize.to_sym
           else
             :patient
@@ -332,7 +332,16 @@ class GraphRecords
   end
 
   def node_text(obj)
-    "\"#{node_display_name(obj)}\""
+    text = "\"#{node_display_name(obj)}"
+
+    unless @clickable
+      command = "#{obj.class.to_s.classify}.find(#{obj.id})".gsub(" ", "&nbsp;").gsub("-", "&#8209;")
+      text += "<br><span style=\"font-size:10px\"><i>#{command}</i></span>"
+      command = "puts GraphRecords.new.graph(#{obj.class.name.underscore}: #{obj.id})".gsub(" ", "&nbsp;").gsub("-", "&#8209;")
+      text += "<br><span style=\"font-size:10px\"><i>#{command}</i></span>"
+    end
+
+    "#{text}\""
   end
 
   def node_with_class(obj)
