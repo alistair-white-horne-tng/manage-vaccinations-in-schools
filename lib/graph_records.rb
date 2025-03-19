@@ -337,22 +337,21 @@ class GraphRecords
     "#{klass} #{obj.id}"
   end
 
+  def non_breaking_text(text)
+    text.gsub(" ", "&nbsp;").gsub("-", "#8209;")
+  end
+
   def node_text(obj)
     text = "\"#{node_display_name(obj)}"
 
     unless @clickable
+      command = "#{obj.class.to_s.classify}.find(#{obj.id})"
+      text +=
+        "<br><span style=\"font-size:10px\"><i>#{non_breaking_text(command)}</i></span>"
       command =
-        "#{obj.class.to_s.classify}.find(#{obj.id})".gsub(" ", "&nbsp;").gsub(
-          "-",
-          "&#8209;"
-        )
-      text += "<br><span style=\"font-size:10px\"><i>#{command}</i></span>"
-      command =
-        "puts GraphRecords.new.graph(#{obj.class.name.underscore}: #{obj.id})".gsub(
-          " ",
-          "&nbsp;"
-        ).gsub("-", "&#8209;")
-      text += "<br><span style=\"font-size:10px\"><i>#{command}</i></span>"
+        "puts GraphRecords.new.graph(#{obj.class.name.underscore}: #{obj.id})"
+      text +=
+        "<br><span style=\"font-size:10px\"><i>#{non_breaking_text(command)}</i></span>"
     end
 
     "#{text}\""
