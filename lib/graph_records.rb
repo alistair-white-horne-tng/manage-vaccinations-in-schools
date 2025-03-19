@@ -35,16 +35,17 @@ class GraphRecords
     fill:#000000,color:white
   ].freeze
 
-  # TODO: choose good allowed values
-  ALLOWED_TYPES = %i[
+  DEFAULT_NODE_ORDER = %i[
     programme
     organisation
     team
     location
     session
+    session_date
     class_import
     cohort_import
     patient_session
+    session_attendance
     gillick_assessment
     patient
     vaccine
@@ -58,27 +59,8 @@ class GraphRecords
     parent
   ].freeze
 
-  DEFAULT_NODE_ORDER = %i[
-    programme
-    organisation
-    team
-    location
-    session
-    class_import
-    cohort_import
-    patient_session
-    gillick_assessment
-    patient
-    vaccine
-    batch
-    vaccination_record
-    triage
-    user
-    consent
-    consent_form
-    parent_relationship
-    parent
-  ].freeze
+  # TODO: choose good allowed values
+  ALLOWED_TYPES = DEFAULT_NODE_ORDER
 
   DEFAULT_TRAVERSALS = {
     patient: {
@@ -131,12 +113,24 @@ class GraphRecords
     session: {
       session: %i[location programmes session_dates]
     },
+    session_attendance: {
+      session_attendance: %i[patient_session session_date],
+      patient_session: %i[session gillick_assessments patient],
+      session: %i[location],
+      session_date: %i[session]
+    },
     patient_session: {
-      patient_session: %i[session patient session_attendances gillick_assessments]
+      patient_session: %i[
+        session
+        patient
+        session_attendances
+        gillick_assessments
+      ],
+      session: %i[location]
     },
     gillick_assessment: {
-      gillick_assessment: %i[patient patient_session performed_by programme],
-      patient_session: %i[session],
+      gillick_assessment: %i[patient_session performed_by programme],
+      patient_session: %i[session patient],
       session: %i[location]
     },
     triage: {
@@ -163,7 +157,8 @@ class GraphRecords
       organisation: [:programmes]
     },
     session_date: {
-      session_date: [:session]
+      session_date: [:session],
+      session: %i[location]
     },
     cohort_import: {
       cohort_import: %i[organisation uploaded_by]
