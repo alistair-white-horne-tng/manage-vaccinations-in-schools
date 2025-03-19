@@ -9,6 +9,8 @@ module Inspect
 
       def show
         @primary_type = safe_get_primary_type
+        render plain: "You don't have permission to view object type: #{params[:object_type].to_s.downcase.singularize}",
+               status: :bad_request and return if @primary_type.nil?
         @primary_id = params[:object_id].to_i
 
         # Set default relationships when loading a page
@@ -95,8 +97,7 @@ module Inspect
         object_type = params[:object_type].to_s.downcase.singularize
         allowed_types = GraphRecords::ALLOWED_TYPES.map(&:to_s)
         unless allowed_types.include?(object_type)
-          render plain: "Invalid object type: #{object_type}",
-                 status: :bad_request and return
+          return nil
         end
         object_type.to_sym
       end

@@ -45,6 +45,7 @@ class GraphRecords
     class_import
     cohort_import
     patient_session
+    gillick_assessment
     patient
     vaccine
     batch
@@ -66,6 +67,7 @@ class GraphRecords
     class_import
     cohort_import
     patient_session
+    gillick_assessment
     patient
     vaccine
     batch
@@ -86,13 +88,14 @@ class GraphRecords
         cohort_imports
         class_imports
         vaccination_records
-        sessions
+        patient_sessions
         triages
         school
       ],
       parent: %i[patients consents cohort_imports class_imports],
       consent: %i[consent_form patient parent],
       session: %i[location],
+      patient_session: %i[session session_attendances gillick_assessments],
       vaccination_record: %i[session]
     },
     parent: {
@@ -127,6 +130,14 @@ class GraphRecords
     },
     session: {
       session: %i[location programmes session_dates]
+    },
+    patient_session: {
+      patient_session: %i[session patient session_attendances gillick_assessments]
+    },
+    gillick_assessment: {
+      gillick_assessment: %i[patient patient_session performed_by programme],
+      patient_session: %i[session],
+      session: %i[location]
     },
     triage: {
       triage: %i[patient performed_by programme]
@@ -335,9 +346,17 @@ class GraphRecords
     text = "\"#{node_display_name(obj)}"
 
     unless @clickable
-      command = "#{obj.class.to_s.classify}.find(#{obj.id})".gsub(" ", "&nbsp;").gsub("-", "&#8209;")
+      command =
+        "#{obj.class.to_s.classify}.find(#{obj.id})".gsub(" ", "&nbsp;").gsub(
+          "-",
+          "&#8209;"
+        )
       text += "<br><span style=\"font-size:10px\"><i>#{command}</i></span>"
-      command = "puts GraphRecords.new.graph(#{obj.class.name.underscore}: #{obj.id})".gsub(" ", "&nbsp;").gsub("-", "&#8209;")
+      command =
+        "puts GraphRecords.new.graph(#{obj.class.name.underscore}: #{obj.id})".gsub(
+          " ",
+          "&nbsp;"
+        ).gsub("-", "&#8209;")
       text += "<br><span style=\"font-size:10px\"><i>#{command}</i></span>"
     end
 
