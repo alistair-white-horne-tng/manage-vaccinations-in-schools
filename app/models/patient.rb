@@ -417,12 +417,4 @@ class Patient < ApplicationRecord
       .where(session: sessions_for_current_academic_year)
       .find_each(&:destroy_if_safe!)
   end
-
-  def normalize_name(name)
-    name.gsub(/\s+/, " ")
-  end
-
-  def normalize_nhs_number(nhs_number)
-    nhs_number.gsub(/\s+/, " ")
-  end
 end
